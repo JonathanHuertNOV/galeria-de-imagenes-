@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Galería de Imágenes</title>
+<style>
+  :root {
+    --bg: #f3f6f4;
+    --surface: #ffffff;
+    --ink: #14231f;
+    --muted: #5b6b66;
+    --line: #cfd9d4;
+    --accent: #0f766e;
+    --accent-ink: #ffffff;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101a17;
+      --surface: #182622;
+      --ink: #e8f1ee;
+      --muted: #9bb0a9;
+      --line: #2c3f3a;
+      --accent: #5eead4;
+      --accent-ink: #06221e;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #101a17;
+    --surface: #182622;
+    --ink: #e8f1ee;
+    --muted: #9bb0a9;
+    --line: #2c3f3a;
+    --accent: #5eead4;
+    --accent-ink: #06221e;
+  }
+
+  html {
+    scroll-padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Trebuchet MS", "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Encabezado y navegación */
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--line);
+    padding: 0.9rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 1.35rem;
+  }
+
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    margin-left: 1.2rem;
+    font-size: 0.95rem;
+  }
+
+  nav a:hover,
+  nav a:focus-visible {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  /* Contenedor principal */
+  .layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Barra lateral de categorías */
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-self: start;
+  }
+
+  .side button {
+    font: inherit;
+    text-align: left;
+    padding: 0.7rem 0.9rem;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .side button:hover {
+    border-color: var(--accent);
+  }
+
+  .side button[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+    font-weight: 700;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  main {
+    min-width: 0;
+  }
+
+  main h2 {
+    margin: 0.2rem 0 1rem;
+    font-size: 1.5rem;
+  }
+
+  /* Cuadrícula de tarjetas */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  .card {
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    padding: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+  }
+
+  .card[aria-pressed="true"] {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .pic {
+    aspect-ratio: 3 / 4;
+    display: block;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .pic img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+
+  .card:hover .pic img {
+    transform: scale(1.04);
+  }
+
+  .cap {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-top: 1.5px solid var(--line);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Panel de información inferior */
+  .info {
+    margin-top: 1.25rem;
+    border: 1.5px dashed var(--accent);
+    border-radius: 8px;
+    padding: 1.1rem 1.25rem;
+    background: var(--surface);
+  }
+
+  .info h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1.15rem;
+  }
+
+  .info p {
+    margin: 0 0 0.9rem;
+    color: var(--muted);
+    max-width: 65ch;
+  }
+
+  .up {
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.5rem 0.9rem;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .up:hover,
+  .up:focus-within {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .up input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  /* Pie de página */
+  footer {
+    background: var(--surface);
+    border-top: 2px solid var(--line);
+    padding: 1rem 1.5rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* Responsividad */
+  @media (max-width: 820px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+
+    .side {
+      flex-direction: row;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+    }
+
+    .side button {
+      white-space: nowrap;
+    }
+
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Galería de Imágenes</h1>
+  <nav aria-label="Barra de navegación">
+    <a href="#inicio" onclick="mostrar('Comer'); return false;">Inicio</a>
+    <a href="#galeria" onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'}); return false;">Galería</a>
+    <a href="#acerca" onclick="document.querySelector('.info').scrollIntoView({behavior:'smooth'}); return false;">Acerca de</a>
+    <a href="#contacto" onclick="document.querySelector('footer').scrollIntoView({behavior:'smooth'}); return false;">Contacto</a>
+  </nav>
+</header>
+
+<div class="layout">
+  <aside class="side" id="side" aria-label="Categorías"></aside>
+  <main>
+    <h2 id="titulo"></h2>
+    <div class="grid" id="grid"></div>
+    <section class="info" aria-live="polite">
+      <h3 id="infoT"></h3>
+      <p id="infoP"></p>
+      <label class="up">
+        Cambiar por mi foto
+        <input type="file" accept="image/*" id="file">
+      </label>
+    </section>
+  </main>
+</div>
+
+<footer>© 2026 Galería de Imágenes. Todos los derechos reservados.</footer>
+
+<script>
+  // Base de datos de categorías con fotografías reales de alta resolución
+  const datos = {
+    "Comer": {
+      c: ["#fbbf24", "#ef4444"],
+      items: [
+        [
+          "Tacos al pastor",
+          "Tortilla con carne marinada, piña y cilantro. Un clásico de la cocina mexicana.",
+          "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?auto=format&fit=crop&w=600&q=80"
+        ],
+        [
+          "Pizza",
+          "Masa horneada con salsa de tomate, queso y los ingredientes que prefieras.",
+          "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80"
+        ],
+        [
+          "Sushi",
+          "Arroz con pescado fresco y alga nori, de tradición japonesa.",
+          "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80"
+        ],
+        [
+          "Pastel",
+          "Postre de bizcocho y crema para celebrar cualquier ocasión.",
+          "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80"
+        ]
+      ]
+    },
+    "Sueños": {
+      c: ["#4338ca", "#a855f7"],
+      items: [
+        [
+          "Noche tranquila",
+          "Dormir bien es el primer paso para soñar en grande.",
+          "https://images.unsplash.com/photo-1532978379173-523e16f371f2?auto=format&fit=crop&w=600&q=80"
+        ],
+        [
+          "Viajar al espacio",
+          "Un sueño de infancia que muchos aún persiguen.",
+          "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80"
+        ],
+        [
+          "Isla paradisíaca",
+          "Descansar frente al mar, sin prisas ni pendientes.",
+          "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80"
+        ],
+        [
+          "Graduación",
+          "La meta que se logra con esfuerzo y constancia.",
+          "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=600&q=80"
+        ]
+      ]
+    },
+    "Películas": {
+      c: ["#1e293b", "#0ea5e9"],
+      items: [
+        [
+          "Spider-Man: Brand New Day",
+          "Nueva etapa en la vida de Peter Parker enfrentando nuevos desafíos en Nueva York tras reiniciar su historia.",
+          "https://images.unsplash.com/photo-1635805737707-575885ab0820?auto=format&fit=crop&w=600&h=800&q=80"
+        ],
+        [
+          "Avengers: Doomsday",
+          "Los héroes más poderosos de la Tierra se reúnen para enfrentar la amenaza definitiva del Doctor Doom.",
+          "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&h=800&q=80"
+        ],
+        [
+          "Avengers: Encore",
+          "El regreso triunfal de los Vengadores en una batalla decisiva que reúne a aliados de todas las eras.",
+          "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&h=800&q=80"
+        ],
+        [
+          "Avengers: Secret Wars",
+          "El colapso del multiverso obliga a héroes y villanos a luchar por la supervivencia en Battleworld.",
+          "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=600&h=800&q=80"
+        ]
+      ]
+    },
+    "Contenido": {
+      c: ["#0f766e", "#34d399"],
+      items: [
+        [
+          "Fotografía",
+          "Capturar momentos para recordarlos siempre.",
+          "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=600&q=80"
+        ],
+        [
+          "Blogs",
+          "Ideas y experiencias compartidas por escrito.",
+          "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=600&q=80"
+        ],
+        [
+          "Podcasts",
+          "Conversaciones para escuchar en cualquier lugar.",
+          "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=600&q=80"
+        ],
+        [
+          "Videos",
+          "Contenido en movimiento para aprender y entretenerse.",
+          "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80"
+        ]
+      ]
+    },
+    "Hobbies": {
+      c: ["#db2777", "#fb923c"],
+      items: [
+        [
+          "Tocar guitarra",
+          "Practicar un instrumento relaja y desarrolla la creatividad.",
+          "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=600&q=80"
+        ],
+        [
+          "Deporte",
+          "Mantenerse activo y jugar en equipo.",
+          "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=600&q=80"
+        ],
+        [
+          "Videojuegos",
+          "Retos y mundos para explorar con amigos.",
+          "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80"
+        ],
+        [
+          "Pintura",
+          "Expresar emociones con color y pincel.",
+          "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=600&q=80"
+        ]
+      ]
+    }
+  };
+
+  // Almacenamiento temporal en memoria para fotos personalizadas subidas por el usuario
+  const custom = {};
+  let cat = "Comer";
+  let sel = 0;
+
+  const side = document.getElementById("side");
+  const grid = document.getElementById("grid");
+  const titulo = document.getElementById("titulo");
+  const infoT = document.getElementById("infoT");
+  const infoP = document.getElementById("infoP");
+  const file = document.getElementById("file");
+
+  // Genera la etiqueta <img> con respaldo automático en caso de error de red
+  function crearImagen(c, i) {
+    const k = c + i;
+    const item = datos[c].items[i];
+    const src = custom[k] ? custom[k] : item[2];
+    const fallbackUrl = `https://placehold.co/600x800/0f766e/ffffff?text=${encodeURIComponent(item[0])}`;
+    
+    return `<img 
+      src="${src}" 
+      alt="${item[0]}" 
+      loading="lazy"
+      onerror="this.onerror=null; this.src='${fallbackUrl}';"
+    >`;
+  }
+
+  // Actualiza el panel inferior con el título y descripción de la tarjeta seleccionada
+  function mostrarInfo(i) {
+    sel = i;
+    const it = datos[cat].items[i];
+    infoT.textContent = it[0];
+    infoP.textContent = it[1];
+    [...grid.children].forEach((c, j) => c.setAttribute("aria-pressed", j === i));
+  }
+
+  // Renderiza las tarjetas de la categoría elegida
+  function mostrar(c) {
+    cat = c;
+    titulo.textContent = c;
+    [...side.children].forEach(b => b.setAttribute("aria-pressed", b.textContent === c));
+    
+    const d = datos[c];
+    grid.innerHTML = "";
+    
+    d.items.forEach((it, i) => {
+      const b = document.createElement("button");
+      b.className = "card";
+      b.setAttribute("aria-pressed", "false");
+      b.innerHTML = `
+        <span class="pic" style="background:linear-gradient(160deg, ${d.c[0]}, ${d.c[1]})">
+          ${crearImagen(c, i)}
+        </span>
+        <div class="cap">${it[0]}</div>
+      `;
+      b.onclick = () => mostrarInfo(i);
+      grid.appendChild(b);
+    });
+    
+    mostrarInfo(0);
+  }
+
+  // Maneja la subida de archivos locales para reemplazar la imagen seleccionada
+  file.onchange = () => {
+    const f = file.files[0];
+    if (!f) return;
+    
+    const r = new FileReader();
+    r.onload = () => {
+      custom[cat + sel] = r.result;
+      const keep = sel;
+      mostrar(cat);
+      mostrarInfo(keep);
+    };
+    r.readAsDataURL(f);
+    file.value = "";
+  };
+
+  // Inicializa los botones de las categorías en la barra lateral
+  Object.keys(datos).forEach(c => {
+    const b = document.createElement("button");
+    b.textContent = c;
+    b.onclick = () => mostrar(c);
+    side.appendChild(b);
+  });
+
+  // Carga la primera categoría por defecto
+  mostrar("Comer");
+</script>
+</body>
+</html>
